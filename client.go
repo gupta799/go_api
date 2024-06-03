@@ -59,7 +59,7 @@ func (client *httpClientStruct) request_handler(w http.ResponseWriter, r *http.R
 	go client.asyncRequest(resultChan, payload)
 
 	// Start a goroutine to collect the result and write the response
-	go func() {
+
 		response := <-resultChan
 		if response != nil {
 			respondWithJson(w, 200, response)
@@ -68,5 +68,5 @@ func (client *httpClientStruct) request_handler(w http.ResponseWriter, r *http.R
 			return
 		}
 		close(resultChan) // Close the channel after sending the result
-	}()
+	
 }
