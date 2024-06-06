@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"net/http"
-
+	"github.com/gupta799/go_api/baseClient"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/parnurzeal/gorequest"
+	"github.com/gupta799/go_api/handlers"
+	"github.com/gupta799/go_api/middlewares"
 )
 
 func main() {
@@ -23,16 +25,26 @@ func main() {
 		w.Write([]byte("welcome"))
 	})
 	request := gorequest.New()
-	myStruct := httpClientStruct{
+    baseStruct:= &baseClient.BaseClientStruct{
+        Request: request,
+    }
+	
+	myStruct := handlers.HttpClientStruct{
 		Request: request,
+        BaseRequest: baseStruct,
 	}
 	port := ":8080"
 
 	mountedRouter := chi.NewRouter()
-	mountedRouter.Get("/health", handlerReadiness)
+	mountedRouter.Get("/health", handlers.HandlerReadiness)
 
 	r.Mount("/v1", mountedRouter)
-    r.Post("/about",myStruct.request_handler)
+	r.Get("/getToken",handlers.AuthHandler)
+	   r.Group(func(r chi.Router) {
+        r.Use(middlewares.JWTAuth) // Apply the JWTAuth middleware to this group
+		r.Post("/about",myStruct.RagQauery_handler)
+
+    })
 
 	srv := &http.Server{
 		Handler: r,
